@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Next-Gen Digital Signature Security{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 20px auto;">
+
+    <!-- Hero Section -->
+    <div style="text-align: center; padding: 48px 20px; position: relative;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); padding: 6px 16px; border-radius: 9999px; font-size: 0.8rem; color: var(--cyan); margin-bottom: 24px;">
+            <span class="pulse-dot"></span>
+            <span>NEXT-GEN HYBRID SECURITY PARADIGM</span>
+        </div>
+
+        <h1 style="font-size: 2.75rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px; background: linear-gradient(135deg, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Quantum-Inspired Cyber Threat Detection <br>
+            <span style="background: linear-gradient(135deg, var(--cyan), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                for Digital Signature Security
+            </span>
+        </h1>
+
+        <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 780px; margin: 0 auto 36px; line-height: 1.7;">
+            Bridging deterministic RSA-PSS cryptographic verification with a classical quantum-inspired amplitude projection engine. Detect sophisticated forgery probes, key substitution attacks, and anomalous telemetry in real time.
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                Launch Security Console
+            </a>
+            <a href="{{ url_for('core.about') }}" class="btn btn-secondary" style="padding: 14px 28px; font-size: 1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Explore Mathematical Model
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Demo Access Alert -->
+    <div style="background: rgba(0, 112, 243, 0.1); border: 1px solid var(--border-bright); border-radius: var(--radius-md); padding: 16px 24px; margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="background: rgba(0, 240, 255, 0.2); padding: 10px; border-radius: var(--radius-sm); color: var(--cyan);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <div>
+                <strong style="color: var(--text-primary);">Evaluator & Demo Access:</strong>
+                <span style="color: var(--text-secondary); margin-left: 8px;">
+                    Username: <code class="mono" style="color: var(--cyan);">demo_analyst</code> &nbsp;|&nbsp;
+                    Password: <code class="mono" style="color: var(--cyan);">CyberSec#2026!</code>
+                </span>
+            </div>
+        </div>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Instant Sign-In &rarr;</a>
+    </div>
+
+    <!-- Core Pillars Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 48px;">
+        <!-- Pillar 1 -->
+        <div class="card" style="margin-bottom: 0;">
+            <div style="width: 44px; height: 44px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #34d399;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 10px; color: var(--text-primary);">Strict RSA-PSS Verification</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                Deterministic mathematical integrity verification using standard RSA-PSS with SHA-256 and MGF1 masking. Tampered bits produce instant mathematical invalidation.
+            </p>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="card" style="margin-bottom: 0;">
+            <div style="width: 44px; height: 44px; background: rgba(0, 240, 255, 0.12); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--cyan);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path></svg>
+            </div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 10px; color: var(--text-primary);">Born-Rule Threat Scoring</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                Maps classical telemetry features to bounded quantum phase angles \(\theta_j \in [0, \pi/2]\), calculating threat amplitude \(\beta\) and projection probability \(P(\text{Threat}) = |\beta|^2\).
+            </p>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="card" style="margin-bottom: 0;">
+            <div style="width: 44px; height: 44px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #fbbf24;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 10px; color: var(--text-primary);">Explainable Threat Telemetry</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                No black-box obscurity. Every assessment returns exact amplitude contributions \(\Delta S_j\), burst frequency indices, and actionable incident-response recommendations.
+            </p>
+        </div>
+    </div>
+
+    <!-- Architectural Pipeline Showcase -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                <span>End-to-End Security Pipeline</span>
+            </div>
+            <span class="badge badge-info">Zero Raw Message Storage</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 12px 0;">
+            <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="color: var(--cyan); font-weight: 700; margin-bottom: 6px;">1. INGESTION</div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);">Message, Public Key PEM & Base64 Signature</div>
+            </div>
+            <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="color: #34d399; font-weight: 700; margin-bottom: 6px;">2. RSA-PSS CHECK</div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);">Cryptographic pass/fail verification</div>
+            </div>
+            <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="color: #fbbf24; font-weight: 700; margin-bottom: 6px;">3. QUANTUM MAPPER</div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);">Phase angles & amplitude projection</div>
+            </div>
+            <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="color: #f87171; font-weight: 700; margin-bottom: 6px;">4. ACTIONABLE SOC</div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);">Risk severity rating & incident response</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

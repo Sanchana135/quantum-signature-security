@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Quantum-Inspired Threat Simulator{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">
+        Quantum-Inspired Threat Analysis & Simulator
+    </h1>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">
+        Interactive laboratory exploring phase-angle state mappings, Born-rule amplitude projections, and ensemble Isolation Forest inference.
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: start;">
+
+    <!-- Left Column: Interactive Simulation Controls -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path></svg>
+                <span>Telemetry Parameter Controls</span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetSimulator()">Reset Nominal</button>
+        </div>
+
+        <!-- 1. Crypto Validity Toggle -->
+        <div class="form-group">
+            <label class="form-label">1. Deterministic Cryptographic Status</label>
+            <div style="display: flex; gap: 12px;">
+                <label style="flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg-surface); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); cursor: pointer;">
+                    <input type="radio" name="sim_crypto" value="valid" checked onchange="triggerSimUpdate()">
+                    <span style="color: #34d399; font-weight: 600;">Valid Signature (0.0)</span>
+                </label>
+                <label style="flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg-surface); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); cursor: pointer;">
+                    <input type="radio" name="sim_crypto" value="invalid" onchange="triggerSimUpdate()">
+                    <span style="color: #f87171; font-weight: 600;">Crypto Mismatch (1.0)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 2. Recent Failures Slider -->
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <label for="sim_burst" class="form-label" style="margin-bottom: 0;">2. Rolling Window Failures (10-min)</label>
+                <span id="sim_burst_val" style="color: var(--cyan); font-weight: 700;">0 failures</span>
+            </div>
+            <input type="range" id="sim_burst" class="form-control" min="0" max="10" step="1" value="0" oninput="triggerSimUpdate()">
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Normalized via hyperbolic tangent: \(\tanh(k/2.5)\)</div>
+        </div>
+
+        <!-- 3. Request Velocity Slider -->
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <label for="sim_velocity" class="form-label" style="margin-bottom: 0;">3. Verification Frequency (req/min)</label>
+                <span id="sim_velocity_val" style="color: var(--cyan); font-weight: 700;">1.0 req/min</span>
+            </div>
+            <input type="range" id="sim_velocity" class="form-control" min="1" max="40" step="1" value="1" oninput="triggerSimUpdate()">
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Standard baseline &le; 5 req/min. High velocity signals automated attack.</div>
+        </div>
+
+        <!-- 4. Key Modulus Selection -->
+        <div class="form-group">
+            <label for="sim_keysize" class="form-label">4. RSA Key Size</label>
+            <select id="sim_keysize" class="form-control" onchange="triggerSimUpdate()">
+                <option value="2048" selected>2048-bit (Standard - 0.0 penalty)</option>
+                <option value="3072">3072-bit (Robust - 0.0 penalty)</option>
+                <option value="1024">1024-bit (Weak / Deprecated - 0.6 penalty)</option>
+                <option value="512">512-bit (Broken - 1.0 penalty)</option>
+            </select>
+        </div>
+
+        <!-- 5. Format / Entropy Irregularity -->
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <label for="sim_format" class="form-label" style="margin-bottom: 0;">5. Format / Entropy Anomaly Level</label>
+                <span id="sim_format_val" style="color: var(--cyan); font-weight: 700;">0 issues</span>
+            </div>
+            <input type="range" id="sim_format" class="form-control" min="0" max="3" step="1" value="0" oninput="triggerSimUpdate()">
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Covers corrupt Base64 padding, missing PEM boundaries, or high entropy mutations.</div>
+        </div>
+    </div>
+
+    <!-- Right Column: Live Computed Quantum Telemetry -->
+    <div>
+        <!-- Threat Gauge Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Simulated Threat Evaluation</span>
+                </div>
+                <span id="sim_badge_risk" class="badge badge-low" style="font-size: 0.85rem; padding: 6px 14px;">
+                    RISK: LOW
+                </span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Projected Threat Score</span>
+                <span id="sim_threat_score" style="font-size: 2.2rem; font-weight: 800; color: #34d399;">
+                    0.0 <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span>
+                </span>
+            </div>
+
+            <div class="threat-meter">
+                <div id="sim_threat_fill" class="threat-meter-fill threat-fill-low" style="width: 0%;"></div>
+            </div>
+
+            <!-- State Vector Equation Box -->
+            <div class="math-box">
+                <div id="sim_state_vector">|&psi;&rang; = 1.000 |0&rang; + 0.000 |1&rang;</div>
+                <div id="sim_born_prob" style="margin-top: 4px; font-size: 0.78rem; color: var(--text-secondary);">
+                    Born Rule: P(Nominal) = 100.0% | P(Threat) = 0.0%
+                </div>
+            </div>
+
+            <!-- Classical Machine Learning Benchmark -->
+            <div style="background: var(--bg-surface); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; border: 1px solid var(--border-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <strong style="color: var(--text-primary); font-size: 0.85rem;">scikit-learn Isolation Forest Ensemble:</strong>
+                    <span id="sim_ml_badge" class="badge badge-valid">NOMINAL INLIER</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                    <span>ML Anomaly Score: <strong id="sim_ml_score" style="color: var(--cyan);">12.5</strong>/100</span>
+                    <span>Decision Score: <strong id="sim_ml_decision">0.150</strong></span>
+                </div>
+            </div>
+
+            <!-- Amplitude Feature Breakdown Table -->
+            <div class="table-responsive">
+                <table class="cyber-table" style="font-size: 0.8rem;">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Phase &theta;<sub>j</sub></th>
+                            <th>Weight w<sub>j</sub></th>
+                            <th>Contribution &Delta;S<sub>j</sub></th>
+                        </tr>
+                    </thead>
+                    <tbody id="sim_breakdown_body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Detection Reasons -->
+            <div style="margin-top: 16px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+                    Simulated Assessment Findings:
+                </div>
+                <ul id="sim_reasons_list" style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                    <li>Normal cryptographic baseline telemetry.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    triggerSimUpdate();
+});
+
+function resetSimulator() {
+    document.querySelector('input[name="sim_crypto"][value="valid"]').checked = true;
+    document.getElementById('sim_burst').value = 0;
+    document.getElementById('sim_velocity').value = 1;
+    document.getElementById('sim_keysize').value = '2048';
+    document.getElementById('sim_format').value = 0;
+    triggerSimUpdate();
+}
+
+async function triggerSimUpdate() {
+    const isCryptoValid = document.querySelector('input[name="sim_crypto"]:checked').value === 'valid';
+    const burst = parseInt(document.getElementById('sim_burst').value, 10);
+    const velocity = parseFloat(document.getElementById('sim_velocity').value);
+    const keySize = parseInt(document.getElementById('sim_keysize').value, 10);
+    const formatIssues = parseInt(document.getElementById('sim_format').value, 10);
+
+    // Update labels
+    document.getElementById('sim_burst_val').innerText = `${burst} failure${burst === 1 ? '' : 's'}`;
+    document.getElementById('sim_velocity_val').innerText = `${velocity.toFixed(1)} req/min`;
+    document.getElementById('sim_format_val').innerText = `${formatIssues} issue${formatIssues === 1 ? '' : 's'}`;
+
+    try {
+        const response = await fetch('/api/analysis/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify({
+                is_crypto_valid: isCryptoValid,
+                recent_failures: burst,
+                velocity: velocity,
+                key_size: keySize,
+                format_issues: formatIssues
+            })
+        });
+
+        const res = await response.json();
+        if (res.status === 'success') {
+            updateSimUI(res.data.quantum, res.data.isolation_forest);
+        }
+    } catch (err) {
+        console.error('Simulator evaluation error:', err);
+    }
+}
+
+function updateSimUI(q, ml) {
+    const score = q.threat_score;
+    const risk = q.risk_level;
+
+    // Score & Gauge
+    const scoreElem = document.getElementById('sim_threat_score');
+    scoreElem.innerHTML = `${score.toFixed(1)} <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span>`;
+    
+    let color = '#34d399';
+    if (score > 25) color = '#fbbf24';
+    if (score > 55) color = '#fb923c';
+    if (score > 80) color = '#f87171';
+    scoreElem.style.color = color;
+
+    const fill = document.getElementById('sim_threat_fill');
+    fill.style.width = `${score}%`;
+    fill.className = `threat-meter-fill threat-fill-${risk.toLowerCase()}`;
+
+    // Risk Badge
+    const badge = document.getElementById('sim_badge_risk');
+    badge.className = `badge badge-${risk.toLowerCase()}`;
+    badge.innerText = `RISK: ${risk}`;
+
+    // State Vector
+    document.getElementById('sim_state_vector').innerText = 
+        `|ψ⟩ = ${q.amplitudes.alpha_nominal.toFixed(3)} |0⟩ + ${q.amplitudes.beta_threat.toFixed(3)} |1⟩`;
+    document.getElementById('sim_born_prob').innerText = 
+        `Born Rule: P(Nominal) = ${(q.amplitudes.probability_nominal * 100).toFixed(1)}% | P(Threat) = ${(q.amplitudes.probability_threat * 100).toFixed(1)}%`;
+
+    // ML Section
+    const mlBadge = document.getElementById('sim_ml_badge');
+    if (ml.isolation_forest_anomaly) {
+        mlBadge.className = 'badge badge-invalid';
+        mlBadge.innerText = 'ANOMALOUS OUTLIER';
+    } else {
+        mlBadge.className = 'badge badge-valid';
+        mlBadge.innerText = 'NOMINAL INLIER';
+    }
+    document.getElementById('sim_ml_score').innerText = ml.ml_anomaly_score.toFixed(1);
+    document.getElementById('sim_ml_decision').innerText = ml.raw_decision_score.toFixed(3);
+
+    // Breakdown Table
+    const tbody = document.getElementById('sim_breakdown_body');
+    tbody.innerHTML = '';
+    const featureLabels = {
+        crypto_failure: 'Cryptographic Validity',
+        burst_failure_rate: 'Burst Failure Rate',
+        velocity_anomaly: 'Request Velocity',
+        key_degradation: 'Key Hygiene / Size',
+        format_entropy_penalty: 'Format & Entropy'
+    };
+    const weights = {
+        crypto_failure: 0.40,
+        burst_failure_rate: 0.25,
+        velocity_anomaly: 0.15,
+        key_degradation: 0.10,
+        format_entropy_penalty: 0.10
+    };
+
+    for (const [feat, contrib] of Object.entries(q.amplitude_contributions)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${featureLabels[feat] || feat}</td>
+            <td class="mono">${q.phase_angles[feat] || 0} rad</td>
+            <td>${(weights[feat] * 100).toFixed(0)}%</td>
+            <td class="mono" style="color: ${contrib > 10 ? '#f87171' : 'var(--text-secondary)'};">+${contrib.toFixed(1)}</td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    // Reasons
+    const reasonsList = document.getElementById('sim_reasons_list');
+    reasonsList.innerHTML = '';
+    q.detection_reasons.forEach(r => {
+        const li = document.createElement('li');
+        li.innerText = r;
+        reasonsList.appendChild(li);
+    });
+}
+</script>
+{% endblock %}

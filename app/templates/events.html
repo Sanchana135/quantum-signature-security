@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Security Audit Events{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">
+            Security Audit Event Trail
+        </h1>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">
+            Immutable forensic log of digital signature verifications, brute-force bursts, and session events.
+        </p>
+    </div>
+
+    <div>
+        <a href="{{ url_for('api.export_events_csv') }}" class="btn btn-secondary btn-sm" download>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export CSV Audit Report
+        </a>
+    </div>
+</div>
+
+<!-- Filters & Search Toolbar -->
+<div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+    <form method="GET" action="{{ url_for('core.events') }}" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+        <!-- Severity Filter -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="severity" style="font-size: 0.82rem; color: var(--text-muted);">Severity:</label>
+            <select name="severity" id="severity" class="form-control" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                <option value="">All Severities</option>
+                <option value="INFO" {% if severity == 'INFO' %}selected{% endif %}>INFO</option>
+                <option value="LOW" {% if severity == 'LOW' %}selected{% endif %}>LOW</option>
+                <option value="MEDIUM" {% if severity == 'MEDIUM' %}selected{% endif %}>MEDIUM</option>
+                <option value="HIGH" {% if severity == 'HIGH' %}selected{% endif %}>HIGH</option>
+                <option value="CRITICAL" {% if severity == 'CRITICAL' %}selected{% endif %}>CRITICAL</option>
+            </select>
+        </div>
+
+        <!-- Event Type Filter -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="event_type" style="font-size: 0.82rem; color: var(--text-muted);">Type:</label>
+            <select name="event_type" id="event_type" class="form-control" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                <option value="">All Event Types</option>
+                <option value="CRYPTO_VERIFY_SUCCESS" {% if event_type == 'CRYPTO_VERIFY_SUCCESS' %}selected{% endif %}>Crypto Success</option>
+                <option value="CRYPTO_VERIFY_FAILURE" {% if event_type == 'CRYPTO_VERIFY_FAILURE' %}selected{% endif %}>Crypto Failure</option>
+                <option value="BURST_ATTACK_DETECTED" {% if event_type == 'BURST_ATTACK_DETECTED' %}selected{% endif %}>Burst Attack</option>
+                <option value="AUTH_LOGIN_SUCCESS" {% if event_type == 'AUTH_LOGIN_SUCCESS' %}selected{% endif %}>Auth Login Success</option>
+                <option value="AUTH_LOGIN_FAILED" {% if event_type == 'AUTH_LOGIN_FAILED' %}selected{% endif %}>Auth Login Failed</option>
+            </select>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="flex: 1; min-width: 220px;">
+            <input type="text" name="q" class="form-control" placeholder="Search by title, description, or IP..." 
+                   value="{{ search or '' }}" style="padding: 6px 12px; font-size: 0.85rem;">
+        </div>
+
+        <!-- Action Buttons -->
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        {% if severity or event_type or search %}
+        <a href="{{ url_for('core.events') }}" class="btn btn-secondary btn-sm">Reset</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Events Table -->
+<div class="card">
+    {% if pagination.items %}
+    <div class="table-responsive">
+        <table class="cyber-table">
+            <thead>
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Event Summary</th>
+                    <th>Origin IP</th>
+                    <th>Verification Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ev in pagination.items %}
+                <tr>
+                    <td>{{ ev.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="mono" style="font-size: 0.78rem;">{{ ev.event_type }}</td>
+                    <td><span class="badge badge-{{ ev.severity|lower }}">{{ ev.severity }}</span></td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">{{ ev.title }}</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">{{ ev.description }}</div>
+                    </td>
+                    <td class="mono">{{ ev.ip_address or 'N/A' }}</td>
+                    <td>
+                        {% if ev.verification_id %}
+                        <a href="{{ url_for('core.analysis_detail', record_id=ev.verification_id) }}" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">
+                            Record #{{ ev.verification_id }}
+                        </a>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.8rem;">System / Auth</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if pagination.pages > 1 %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-subtle); font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">
+            Showing page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} total events)
+        </span>
+        <div style="display: flex; gap: 6px;">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('core.events', page=pagination.prev_num, severity=severity, event_type=event_type, q=search) }}" class="btn btn-secondary btn-sm">&laquo; Prev</a>
+            {% endif %}
+
+            {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if p %}
+                    {% if p == pagination.page %}
+                    <span class="btn btn-primary btn-sm" style="pointer-events: none;">{{ p }}</span>
+                    {% else %}
+                    <a href="{{ url_for('core.events', page=p, severity=severity, event_type=event_type, q=search) }}" class="btn btn-secondary btn-sm">{{ p }}</a>
+                    {% endif %}
+                {% else %}
+                    <span style="padding: 6px 8px; color: var(--text-muted);">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+            <a href="{{ url_for('core.events', page=pagination.next_num, severity=severity, event_type=event_type, q=search) }}" class="btn btn-secondary btn-sm">Next &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <h4>No Matching Security Events</h4>
+        <p>No audit trail records matched the selected filters. Try broadening your search or resetting filters.</p>
+        <a href="{{ url_for('core.events') }}" class="btn btn-secondary" style="margin-top: 12px;">Reset Filters</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

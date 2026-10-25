@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="32" height="32" fill="none">
+  <!-- Outer Shield Contour -->
+  <path d="M24 4L7 11V22C7 33.5 14.5 43.5 24 46C33.5 43.5 41 33.5 41 22V11L24 4Z" 
+        stroke="#00f0ff" stroke-width="2.5" stroke-linejoin="round" fill="rgba(0, 240, 255, 0.05)"/>
+  
+  <!-- Quantum Orbital Ellipse 1 -->
+  <ellipse cx="24" cy="24" rx="14" ry="5.5" 
+           stroke="#0070f3" stroke-width="1.8" transform="rotate(-30 24 24)" stroke-dasharray="1 2"/>
+  
+  <!-- Quantum Orbital Ellipse 2 -->
+  <ellipse cx="24" cy="24" rx="14" ry="5.5" 
+           stroke="#38bdf8" stroke-width="1.8" transform="rotate(30 24 24)"/>
+  
+  <!-- Central Cryptographic Core -->
+  <circle cx="24" cy="24" r="3.5" fill="#00f0ff"/>
+  <circle cx="24" cy="24" r="6" stroke="#00f0ff" stroke-width="1" opacity="0.6"/>
+</svg>

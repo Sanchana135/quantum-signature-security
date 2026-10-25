@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Analyst Sign In{% endblock %}
+
+{% block content %}
+<div style="max-width: 440px; margin: 40px auto;">
+    <div class="card">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 52px; height: 52px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: var(--cyan);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Security Console Login</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Authenticate session to access telemetry & threat detection</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="username" class="form-label">Analyst Username</label>
+                <input type="text" id="username" name="username" class="form-control" 
+                       value="{{ username or '' }}" placeholder="e.g. demo_analyst" required autofocus autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control" 
+                       placeholder="••••••••••••" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                Authenticate Session
+            </button>
+        </form>
+
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+            New analyst? <a href="{{ url_for('auth.register') }}" style="color: var(--cyan); text-decoration: none; font-weight: 600;">Register an account</a>
+        </div>
+    </div>
+
+    <!-- Quick Demo Credential Autofill Helper -->
+    <div style="background: rgba(13, 21, 39, 0.6); border: 1px dashed var(--border-bright); border-radius: var(--radius-sm); padding: 14px 18px; text-align: center; font-size: 0.82rem; color: var(--text-muted);">
+        <div><strong>Evaluator Demo Credentials:</strong></div>
+        <div style="margin-top: 6px;">
+            User: <code class="mono" style="color: var(--cyan);">demo_analyst</code> &nbsp;|&nbsp; 
+            Pass: <code class="mono" style="color: var(--cyan);">CyberSec#2026!</code>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 10px; width: 100%;" onclick="autofillDemo()">
+            Autofill Demo Credentials
+        </button>
+    </div>
+</div>
+
+<script>
+function autofillDemo() {
+    document.getElementById('username').value = 'demo_analyst';
+    document.getElementById('password').value = 'CyberSec#2026!';
+    if (typeof showToast === 'function') {
+        showToast('Demo credentials autofilled', 'info');
+    }
+}
+</script>
+{% endblock %}

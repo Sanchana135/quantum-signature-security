@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Security Perimeter Not Found{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 80px auto; text-align: center;">
+    <div style="width: 72px; height: 72px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--cyan);">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+    </div>
+    
+    <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--cyan); line-height: 1; margin-bottom: 12px;">
+        404
+    </div>
+    
+    <h2 style="font-size: 1.4rem; color: var(--text-primary); margin-bottom: 10px;">Security Endpoint Not Found</h2>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
+        The requested telemetry resource or security console endpoint does not exist or has been relocated behind authentication barriers.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 12px;">
+        <a href="{{ url_for('core.dashboard') if session.get('user_id') else url_for('core.index') }}" class="btn btn-primary">
+            Return to Safety Console
+        </a>
+        <a href="{{ url_for('core.verify') }}" class="btn btn-secondary">
+            Signature Verifier
+        </a>
+    </div>
+</div>
+{% endblock %}

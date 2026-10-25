@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Demo Key Generator & Signature Laboratory{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">
+        Interactive Demo Key & Signing Laboratory
+    </h1>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">
+        Generate ephemeral demonstration RSA keypairs, sign sample transaction payloads, and simulate cryptographic bit-flipping attacks.
+    </p>
+</div>
+
+<!-- Warning Notice -->
+<div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: #fbbf24;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    <div>
+        <strong>Demonstration Environment Notice:</strong> All keys generated in this laboratory are strictly for local educational simulation and testing. Never expose production private keys in a web application.
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+
+    <!-- Step 1: Key Generation -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path></svg>
+                <span>Phase 1: Generate Demonstration Key Pair</span>
+            </div>
+            <span class="badge badge-info">RSA-PSS</span>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px;">
+            <label for="demo_key_size" style="font-size: 0.85rem; color: var(--text-secondary);">Key Modulus:</label>
+            <select id="demo_key_size" class="form-control" style="width: auto; padding: 6px 12px;">
+                <option value="2048" selected>2048-bit (Standard)</option>
+                <option value="3072">3072-bit (High Security)</option>
+                <option value="1024">1024-bit (Legacy / Weak)</option>
+            </select>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-gen-keys" onclick="generateDemoKeys()">
+                Generate New Key Pair
+            </button>
+        </div>
+
+        <!-- Public Key Display -->
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Public Key (SubjectPublicKeyInfo PEM)</label>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyToClipboard('demo_public_key')" style="padding: 2px 8px; font-size: 0.72rem;">
+                    Copy PEM
+                </button>
+            </div>
+            <textarea id="demo_public_key" class="form-control" rows="5" readonly placeholder="Click 'Generate New Key Pair' above..."></textarea>
+        </div>
+
+        <!-- Private Key Display (Demo Only) -->
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">
+                    Private Key (PKCS#8 PEM) <span style="color: #f87171;">[DEMO ONLY]</span>
+                </label>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyToClipboard('demo_private_key')" style="padding: 2px 8px; font-size: 0.72rem;">
+                    Copy PEM
+                </button>
+            </div>
+            <textarea id="demo_private_key" class="form-control" rows="5" readonly placeholder="Demo private key will appear here..."></textarea>
+        </div>
+    </div>
+
+    <!-- Step 2: Message Signing & Tamper Simulation -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Phase 2: Sign Payload & Simulate Attack</span>
+            </div>
+        </div>
+
+        <!-- Message Payload -->
+        <div class="form-group">
+            <label for="demo_message" class="form-label">Message Payload</label>
+            <textarea id="demo_message" class="form-control" rows="3">AUTHORIZED_TRANSACTION_ID: #89421; PAYEE: ACME_CORP; AMOUNT: $250,000.00; STATUS: APPROVED</textarea>
+        </div>
+
+        <!-- Action Buttons for Signing & Tampering -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="signDemoMessage()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Sign with RSA-PSS SHA-256
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="tamperDemoMessage()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
+                Tamper Message (Mutate Byte)
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="tamperDemoSignature()">
+                Corrupt Signature
+            </button>
+        </div>
+
+        <!-- Generated Signature -->
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Generated Base64 Signature</label>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyToClipboard('demo_signature')" style="padding: 2px 8px; font-size: 0.72rem;">
+                    Copy Base64
+                </button>
+            </div>
+            <textarea id="demo_signature" class="form-control" rows="3" readonly placeholder="Signature will appear here upon signing..."></textarea>
+        </div>
+
+        <!-- Quick Transfer to Verifier -->
+        <div style="padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.82rem; color: var(--text-secondary);">Ready to test cryptographic verdict?</span>
+            <button type="button" class="btn btn-primary" onclick="sendToVerifier()">
+                Send Payload to Verifier &rarr;
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Automatically generate an initial pair on laboratory load
+document.addEventListener('DOMContentLoaded', () => {
+    generateDemoKeys();
+});
+
+function generateDemoKeys() {
+    const keySize = document.getElementById('demo_key_size').value;
+    const btn = document.getElementById('btn-gen-keys');
+    btn.disabled = true;
+    btn.innerText = 'Generating...';
+
+    fetch('/api/demo/generate-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+        body: JSON.stringify({ key_size: keySize })
+    })
+    .then(res => res.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerText = 'Generate New Key Pair';
+        if (res.status === 'success') {
+            document.getElementById('demo_public_key').value = res.data.public_key;
+            document.getElementById('demo_private_key').value = res.data.private_key;
+            showToast(`${res.data.key_size}-bit demonstration RSA keys generated`, 'success');
+        } else {
+            showToast(res.message, 'danger');
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerText = 'Generate New Key Pair';
+        showToast('Error generating keys: ' + err, 'danger');
+    });
+}
+
+function signDemoMessage() {
+    const privKey = document.getElementById('demo_private_key').value;
+    const msg = document.getElementById('demo_message').value;
+
+    if (!privKey.trim()) {
+        showToast('Please generate a key pair first', 'warning');
+        return;
+    }
+
+    fetch('/api/demo/sign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+        body: JSON.stringify({ private_key: privKey, message: msg })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status === 'success') {
+            document.getElementById('demo_signature').value = res.data.signature;
+            showToast('Message signed with RSA-PSS SHA-256', 'success');
+        } else {
+            showToast(res.message, 'danger');
+        }
+    })
+    .catch(err => showToast('Signing error: ' + err, 'danger'));
+}
+
+function tamperDemoMessage() {
+    const msg = document.getElementById('demo_message').value;
+    fetch('/api/demo/tamper', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+        body: JSON.stringify({ type: 'message', content: msg })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status === 'success') {
+            document.getElementById('demo_message').value = res.data.tampered;
+            showToast('Message altered! Cryptographic signature will now fail.', 'danger');
+        }
+    });
+}
+
+function tamperDemoSignature() {
+    const sig = document.getElementById('demo_signature').value;
+    if (!sig) {
+        showToast('Please sign the message first.', 'warning');
+        return;
+    }
+    fetch('/api/demo/tamper', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+        body: JSON.stringify({ type: 'signature', content: sig })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status === 'success') {
+            document.getElementById('demo_signature').value = res.data.tampered;
+            showToast('Signature bit-flipped! Cryptographic verification will fail.', 'danger');
+        }
+    });
+}
+
+function sendToVerifier() {
+    const msg = document.getElementById('demo_message').value;
+    const pubKey = document.getElementById('demo_public_key').value;
+    const sig = document.getElementById('demo_signature').value;
+
+    if (!pubKey || !sig) {
+        showToast('Please generate keys and sign the message first.', 'warning');
+        return;
+    }
+
+    // Use sessionStorage to transfer data safely to the verify page
+    sessionStorage.setItem('transfer_msg', msg);
+    sessionStorage.setItem('transfer_pubkey', pubKey);
+    sessionStorage.setItem('transfer_sig', sig);
+
+    window.location.href = "{{ url_for('core.verify') }}";
+}
+
+// In verify.html, auto-load if transfer values exist
+</script>
+{% endblock %}

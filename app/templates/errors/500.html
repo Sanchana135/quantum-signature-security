@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Internal Security Fault{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 80px auto; text-align: center;">
+    <div style="width: 72px; height: 72px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #ef4444;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    </div>
+    
+    <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: #ef4444; line-height: 1; margin-bottom: 12px;">
+        500
+    </div>
+    
+    <h2 style="font-size: 1.4rem; color: var(--text-primary); margin-bottom: 10px;">Internal Processing Anomaly</h2>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
+        {{ error_message or "An unexpected server condition interrupted cryptographic processing. The error has been quarantined." }}
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 12px;">
+        <a href="{{ url_for('core.dashboard') if session.get('user_id') else url_for('core.index') }}" class="btn btn-primary">
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

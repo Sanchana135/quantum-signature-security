@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Forensic Audit Record #{{ record.id }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <a href="{{ url_for('core.dashboard') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;">Dashboard</a>
+            <span style="color: var(--text-muted);">&gt;</span>
+            <span style="color: var(--cyan); font-size: 0.85rem;">Record #{{ record.id }}</span>
+        </div>
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">
+            Forensic Telemetry Audit #{{ record.id }}
+        </h1>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            Executed at {{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC from IP {{ record.ip_address or 'Unknown' }}
+        </p>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('core.verify') }}" class="btn btn-primary btn-sm">+ Verify Another Signature</a>
+        <a href="{{ url_for('core.events') }}" class="btn btn-secondary btn-sm">Audit Trail &rarr;</a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; margin-bottom: 24px;">
+
+    <!-- Card 1: Cryptographic Invariant Analysis -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Cryptographic Verification Audit</span>
+            </div>
+            {% if record.is_crypto_valid %}
+            <span class="badge badge-valid">✓ VALID INTEGRITY</span>
+            {% else %}
+            <span class="badge badge-invalid">✕ CRYPTOGRAPHIC MISMATCH</span>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Cryptographic Algorithm</span>
+                <strong style="color: var(--cyan);">{{ record.algorithm }}</strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">RSA Modulus Bit Length</span>
+                <span>{{ record.key_size if record.key_size else 'Unknown' }} bits</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Key SHA-256 Fingerprint:</span>
+                <span class="mono" style="word-break: break-all; color: var(--text-primary); background: var(--bg-surface); padding: 6px 10px; border-radius: var(--radius-sm);">
+                    {{ record.key_fingerprint }}
+                </span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Payload SHA-256 Digest:</span>
+                <span class="mono" style="word-break: break-all; color: var(--text-primary); background: var(--bg-surface); padding: 6px 10px; border-radius: var(--radius-sm);">
+                    {{ record.message_hash }}
+                </span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Message Preview (First 120 Chars):</span>
+                <span class="mono" style="color: var(--text-secondary); background: var(--bg-surface); padding: 6px 10px; border-radius: var(--radius-sm);">
+                    {{ record.message_preview }}
+                </span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-muted);">Cryptographic Verdict</span>
+                <span style="color: {% if record.is_crypto_valid %}#34d399{% else %}#f87171{% endif %}; font-weight: 600;">
+                    {{ record.crypto_error or 'Signature mathematically verified with RSA-PSS SHA-256.' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Quantum-Inspired Amplitude Assessment -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path></svg>
+                <span>Quantum-Inspired Threat Metric</span>
+            </div>
+            <span class="badge badge-{{ record.risk_level|lower }}">RISK: {{ record.risk_level }}</span>
+        </div>
+
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Calculated Anomaly Score</span>
+                <span style="font-size: 2.2rem; font-weight: 800; color: {% if record.threat_score <= 25 %}#34d399{% elif record.threat_score <= 55 %}#fbbf24{% elif record.threat_score <= 80 %}#fb923c{% else %}#f87171{% endif %};">
+                    {{ "%.1f"|format(record.threat_score) }} <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span>
+                </span>
+            </div>
+
+            <div class="threat-meter">
+                <div class="threat-meter-fill threat-fill-{{ record.risk_level|lower }}" style="width: {{ record.threat_score }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Superposition Math Callout -->
+        {% if record.feature_breakdown.get('amplitudes') %}
+        {% set amps = record.feature_breakdown.get('amplitudes') %}
+        <div class="math-box">
+            <div>|&psi;&rang; = {{ "%.3f"|format(amps.alpha_nominal) }} |0&rang; + {{ "%.3f"|format(amps.beta_threat) }} |1&rang;</div>
+            <div style="margin-top: 4px; font-size: 0.78rem; color: var(--text-secondary);">
+                P(Nominal) = {{ "%.1f"|format(amps.probability_nominal * 100) }}% &nbsp;|&nbsp; P(Threat) = {{ "%.1f"|format(amps.probability_threat * 100) }}%
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Detected Vectors -->
+        <div style="margin-top: 14px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+                Identified Risk Vectors:
+            </div>
+            <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                {% for reason in record.detection_reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- Linked Security Audit Events -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <span>Linked Audit Events for Verification #{{ record.id }}</span>
+        </div>
+    </div>
+
+    {% set linked_events = record.events.all() %}
+    {% if linked_events %}
+    <div class="table-responsive">
+        <table class="cyber-table">
+            <thead>
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>Event Type</th>
+                    <th>Severity</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ev in linked_events %}
+                <tr>
+                    <td>{{ ev.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="mono">{{ ev.event_type }}</td>
+                    <td><span class="badge badge-{{ ev.severity|lower }}">{{ ev.severity }}</span></td>
+                    <td style="color: var(--text-primary); font-weight: 600;">{{ ev.title }}</td>
+                    <td>{{ ev.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+        No isolated security warnings generated for this verification record.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Analyst Profile & Security Settings{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+
+    <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary);">Analyst Profile & Settings</h1>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">Manage session credentials, security role, and personal verification history</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 28px;">
+        <!-- Profile Overview Card -->
+        <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span>Account Credentials</span>
+                </div>
+                <span class="badge badge-info">{{ user.role|upper }}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Username</span>
+                    <strong style="color: var(--text-primary);">{{ user.username }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Email Address</span>
+                    <span style="color: var(--text-secondary);">{{ user.email }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Security Clearance</span>
+                    <span style="color: var(--cyan);">Tier-1 Quantum Signature Analyst</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Provisioned Date</span>
+                    <span style="color: var(--text-secondary);">{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }} UTC</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Last Active Session</span>
+                    <span style="color: var(--text-secondary);">{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Current' }} UTC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <span>Update Password</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.profile') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="current_password" class="form-label">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" class="form-control" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="new_password" class="form-label">New Password</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-secondary btn-block">
+                    Update Session Key
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recent Verifications for this User -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <span>Recent Verifications by {{ user.username }}</span>
+            </div>
+            <a href="{{ url_for('core.verify') }}" class="btn btn-primary btn-sm">+ New Verification</a>
+        </div>
+
+        {% if recent_verifications %}
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>Payload Preview</th>
+                        <th>Cryptographic Status</th>
+                        <th>Threat Score</th>
+                        <th>Risk Level</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in recent_verifications %}
+                    <tr>
+                        <td>{{ rec.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="mono" title="{{ rec.message_preview }}">{{ rec.message_preview[:35] }}...</td>
+                        <td>
+                            {% if rec.is_crypto_valid %}
+                            <span class="badge badge-valid">VALID</span>
+                            {% else %}
+                            <span class="badge badge-invalid">INVALID</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong style="color: {% if rec.threat_score <= 25 %}#34d399{% elif rec.threat_score <= 55 %}#fbbf24{% elif rec.threat_score <= 80 %}#fb923c{% else %}#f87171{% endif %};">
+                                {{ "%.1f"|format(rec.threat_score) }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ rec.risk_level|lower }}">{{ rec.risk_level }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('core.analysis_detail', record_id=rec.id) }}" class="btn btn-secondary btn-sm" style="padding: 3px 8px; font-size: 0.75rem;">
+                                Drill-Down &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <h4>No Verifications Executed Yet</h4>
+            <p>Initiate your first digital signature verification to log telemetry.</p>
+            <a href="{{ url_for('core.verify') }}" class="btn btn-primary" style="margin-top: 14px;">Launch Signature Verifier</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

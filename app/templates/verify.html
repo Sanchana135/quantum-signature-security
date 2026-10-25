@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Digital Signature & Threat Assessment{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">
+        Digital Signature Verification & Threat Engine
+    </h1>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">
+        Rigorous RSA-PSS cryptographic verification combined with quantum-inspired amplitude threat scoring.
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+
+    <!-- Left Column: Input Form -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Verification Inputs</span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="loadSampleVerification()">
+                Load Sample Payload
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('core.verify') }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Message Input -->
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="message" class="form-label" style="margin-bottom: 0;">1. Message Payload</label>
+                    <label class="form-file-input" style="cursor: pointer; color: var(--cyan);">
+                        <span>📁 Upload file</span>
+                        <input type="file" id="file_message" name="message_file" style="display: none;">
+                    </label>
+                </div>
+                <textarea id="message" name="message" class="form-control" rows="4" 
+                          placeholder="Enter UTF-8 plaintext payload or JSON payload to verify..." required>{{ message or '' }}</textarea>
+            </div>
+
+            <!-- Public Key PEM -->
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="public_key" class="form-label" style="margin-bottom: 0;">2. RSA Public Key (PEM)</label>
+                    <label class="form-file-input" style="cursor: pointer; color: var(--cyan);">
+                        <span>📁 Upload .pem / .pub</span>
+                        <input type="file" id="file_public_key" name="public_key_file" style="display: none;">
+                    </label>
+                </div>
+                <textarea id="public_key" name="public_key" class="form-control" rows="5" 
+                          placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----" required>{{ public_key or '' }}</textarea>
+            </div>
+
+            <!-- Signature Base64 -->
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="signature" class="form-label" style="margin-bottom: 0;">3. Digital Signature (Base64)</label>
+                    <label class="form-file-input" style="cursor: pointer; color: var(--cyan);">
+                        <span>📁 Upload .sig</span>
+                        <input type="file" id="file_signature" name="signature_file" style="display: none;">
+                    </label>
+                </div>
+                <textarea id="signature" name="signature" class="form-control" rows="3" 
+                          placeholder="Paste Base64-encoded signature bytes..." required>{{ signature or '' }}</textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                    Execute Verification & Threat Analysis
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Column: Verification Diagnostic & Threat Assessment -->
+    <div>
+        {% if verification_result %}
+        <!-- Cryptographic Result Card -->
+        <div class="card" style="border-color: {% if verification_result.is_valid %}rgba(16, 185, 129, 0.5){% else %}rgba(239, 68, 68, 0.5){% endif %};">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>Deterministic Cryptographic Result</span>
+                </div>
+                {% if verification_result.is_valid %}
+                <span class="badge badge-valid" style="font-size: 0.85rem; padding: 6px 14px;">
+                    ✓ MATHEMATICALLY VALID
+                </span>
+                {% else %}
+                <span class="badge badge-invalid" style="font-size: 0.85rem; padding: 6px 14px;">
+                    ✕ CRYPTOGRAPHIC MISMATCH
+                </span>
+                {% endif %}
+            </div>
+
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                {{ verification_result.explanation }}
+            </p>
+
+            <div style="background: var(--bg-surface); border-radius: var(--radius-sm); padding: 14px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Algorithm:</span>
+                    <strong style="color: var(--cyan);">{{ verification_result.algorithm }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">RSA Key Size:</span>
+                    <span>{{ verification_result.key_size if verification_result.key_size else 'Unknown' }} bits</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Key SHA-256 Fingerprint:</span>
+                    <span class="mono" style="color: var(--text-primary);">{{ verification_result.key_fingerprint[:24] }}...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Message SHA-256 Digest:</span>
+                    <span class="mono" style="color: var(--text-primary);">{{ verification_result.message_hash[:24] }}...</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 14px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                <strong>Key Trust Disclose:</strong> Verifying the signature against this public key proves the message was signed by the key's owner. It does NOT automatically establish identity trust without a verified Certificate Authority or Web-of-Trust.
+            </div>
+        </div>
+
+        <!-- Quantum-Inspired Threat Analysis Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path></svg>
+                    <span>Quantum-Inspired Threat Assessment</span>
+                </div>
+                <span class="badge badge-{{ quantum_result.risk_level|lower }}" style="font-size: 0.85rem; padding: 6px 14px;">
+                    RISK: {{ quantum_result.risk_level }}
+                </span>
+            </div>
+
+            <!-- Threat Score Gauge -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Threat Probability Score</span>
+                    <span style="font-size: 1.8rem; font-weight: 800; color: {% if quantum_result.threat_score <= 25 %}#34d399{% elif quantum_result.threat_score <= 55 %}#fbbf24{% elif quantum_result.threat_score <= 80 %}#fb923c{% else %}#f87171{% endif %};">
+                        {{ "%.1f"|format(quantum_result.threat_score) }} <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span>
+                    </span>
+                </div>
+                
+                <div class="threat-meter">
+                    <div class="threat-meter-fill threat-fill-{{ quantum_result.risk_level|lower }}" 
+                         style="width: {{ quantum_result.threat_score }}%;"></div>
+                </div>
+            </div>
+
+            <!-- Quantum Amplitude Superposition State -->
+            <div class="math-box">
+                <div>State Vector: |&psi;&rang; = {{ "%.3f"|format(quantum_result.amplitudes.alpha_nominal) }}|0&rang; + {{ "%.3f"|format(quantum_result.amplitudes.beta_threat) }}|1&rang;</div>
+                <div style="margin-top: 4px; font-size: 0.78rem; color: var(--text-secondary);">
+                    Born Rule: P(Nominal) = {{ "%.1f"|format(quantum_result.amplitudes.probability_nominal * 100) }}% | P(Threat) = {{ "%.1f"|format(quantum_result.amplitudes.probability_threat * 100) }}%
+                </div>
+            </div>
+
+            <!-- Detection Reasons List -->
+            <div style="margin-bottom: 14px;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">
+                    Detected Telemetry Vectors:
+                </div>
+                <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    {% for reason in quantum_result.detection_reasons %}
+                    <li>{{ reason }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Actionable Recommendations -->
+            <div style="background: rgba(0, 112, 243, 0.08); border-left: 3px solid var(--blue); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 16px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--cyan); margin-bottom: 4px;">Recommended Next Steps:</div>
+                <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                    {% for rec in quantum_result.recommendations %}
+                    <li>{{ rec }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if record_id %}
+            <div style="display: flex; justify-content: flex-end;">
+                <a href="{{ url_for('core.analysis_detail', record_id=record_id) }}" class="btn btn-secondary btn-sm">
+                    View Forensic Record #{{ record_id }} &rarr;
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <!-- Idle Placeholder Waiting for Submission -->
+        <div class="card" style="border-style: dashed; text-align: center; padding: 60px 24px; color: var(--text-muted);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px; opacity: 0.6;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m4.93 4.93 4.24 4.24"></path>
+                <path d="m14.83 9.17 4.24-4.24"></path>
+            </svg>
+            <h4 style="color: var(--text-primary); margin-bottom: 8px;">Awaiting Verification Telemetry</h4>
+            <p style="font-size: 0.88rem; max-width: 340px; margin: 0 auto;">
+                Provide message content, public key, and signature or click <strong>Load Sample Payload</strong> to test immediate cryptographic and quantum threat analysis.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+// Auto-load transferred payload from demo laboratory if present
+document.addEventListener('DOMContentLoaded', () => {
+    const tMsg = sessionStorage.getItem('transfer_msg');
+    const tPub = sessionStorage.getItem('transfer_pubkey');
+    const tSig = sessionStorage.getItem('transfer_sig');
+    if (tMsg && tPub && tSig && !document.getElementById('message').value.trim()) {
+        document.getElementById('message').value = tMsg;
+        document.getElementById('public_key').value = tPub;
+        document.getElementById('signature').value = tSig;
+        sessionStorage.removeItem('transfer_msg');
+        sessionStorage.removeItem('transfer_pubkey');
+        sessionStorage.removeItem('transfer_sig');
+        showToast('Transferred demo payload & signature into verifier!', 'success');
+    }
+});
+
+// Sample RSA 2048-bit key and valid signed message for instant testing
+function loadSampleVerification() {
+    // Generate sample or load from demo API
+    showToast('Fetching sample demonstration key and signed message...', 'info');
+    fetch('/api/demo/generate-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+        body: JSON.stringify({ key_size: 2048 })
+    })
+    .then(res => res.json())
+    .then(keyData => {
+        const pubKey = keyData.data.public_key;
+        const privKey = keyData.data.private_key;
+        const sampleMsg = "AUTHORIZED_TRANSACTION_ID_74912; AMOUNT=50000; TIMESTAMP=2026-10-25T09:00:00Z";
+
+        return fetch('/api/demo/sign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify({ private_key: privKey, message: sampleMsg })
+        }).then(res => res.json()).then(sigData => {
+            document.getElementById('message').value = sampleMsg;
+            document.getElementById('public_key').value = pubKey;
+            document.getElementById('signature').value = sigData.data.signature;
+            showToast('Sample valid signature data loaded!', 'success');
+        });
+    })
+    .catch(err => {
+        showToast('Error loading sample data: ' + err, 'danger');
+    });
+}
+</script>
+{% endblock %}
